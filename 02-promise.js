@@ -106,6 +106,12 @@ RPromise.prototype = {
         onRPromiseStatusChanged(onrejected, reason, resolve, reject)
       })
     })
+  },
+  catch: function(onrejected) {
+    return this.then(undefined, onrejected)
+  },
+  finally: function(onStatusChanged) {
+    return this.then(onStatusChanged, onStatusChanged)
   }
 }
 // 修正构造器
