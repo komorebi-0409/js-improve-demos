@@ -29,7 +29,12 @@ function RPromise(executor) {
     })
   }
 
-  executor(resolve, reject)
+  try {
+    executor(resolve, reject)
+  } catch (err) {
+    reject(err)
+  }
+  
 }
 
 Object.defineProperties(RPromise, {
@@ -53,6 +58,14 @@ Object.defineProperties(RPromise, {
   }
 })
 
+function onRPromiseStatusChanged(fn, result, resolve, reject) {
+  try {
+    resolve(fn(result))
+  } catch (err) {
+    reject(err)
+  }
+}
+
 /**
  * 实例方法
  */
@@ -64,10 +77,17 @@ RPromise.prototype = {
     if (onrejected && typeof onfulfilled !== 'function') {
       throw new TypeError('expect a function')
     }
-    this.onfulfilledFns.push(onfulfilled)
-    if (onrejected) {
-      this.onrejectedFns.push(onrejected)
-    }
+    var _this = this
+    return new RPromise(function(resolve, reject) {
+      _this.onfulfilledFns.push(function(result) {
+        onRPromiseStatusChanged(onfulfilled, result, resolve, reject)
+      })
+      if (onrejected) {
+        _this.onrejectedFns.push(function(reason) {
+          onRPromiseStatusChanged(onrejected, reason, resolve, reject)
+        })
+      }
+    })
   }
 }
 // 修正构造器
