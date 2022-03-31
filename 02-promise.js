@@ -72,10 +72,14 @@ function onRPromiseStatusChanged(fn, result, resolve, reject) {
 RPromise.prototype = {
   then: function(onfulfilled, onrejected) {
     if (typeof onfulfilled !== 'function') {
-      throw new TypeError('expect a function')
+      onfulfilled = function(res) {
+        return res
+      }
     }
-    if (onrejected && typeof onfulfilled !== 'function') {
-      throw new TypeError('expect a function')
+    if (typeof onrejected !== 'function') {
+      onrejected = function(err) {
+        throw err
+      }
     }
     var _this = this
     return new RPromise(function(resolve, reject) {
