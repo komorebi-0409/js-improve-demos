@@ -19,24 +19,31 @@ class DependenciesController {
   }
 }
 
-
-const dependenciesMap = new WeakMap() // 用于存放所有的依赖
-
-function getDependenciesController(target, property){
-  let propertyMap = dependenciesMap.get(target)
-  if (!propertyMap) {
-    propertyMap = new Map()
-    dependenciesMap.set(target, propertyMap)
+/**
+ * 根据对象和其 key, 获取属性对应的依赖控制器
+ */
+const getDependenciesController = function() {
+  const dependenciesMap = new WeakMap() // 用于存放所有的依赖
+  return function (target, property){
+    let propertyMap = dependenciesMap.get(target)
+    if (!propertyMap) {
+      propertyMap = new Map()
+      dependenciesMap.set(target, propertyMap)
+    }
+    let dc = propertyMap.get(property)
+    if (!dc) {
+      dc = new DependenciesController()
+      propertyMap.set(property, dc)
+    }
+    return dc
   }
-  let dc = propertyMap.get(property)
-  if (!dc) {
-    dc = new DependenciesController()
-    propertyMap.set(property, dc)
-  }
-  return dc
-}
+}()
+
 
 function watchEffect(fn){
+  if (typeof fn !== 'function') {
+    throw new TypeError('A dependency should be a function!')
+  }
   currentDependency = fn
   currentDependency()
   currentDependency = null
