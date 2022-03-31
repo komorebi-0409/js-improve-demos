@@ -8,9 +8,13 @@ function RPromise(executor) {
     if (_this.status !== RPromise.STATUS_PENDING) {
       return
     }
-    _this.status = RPromise.STATUS_FULFILLED
     // 对于支持的环境，可以使用queueMicrotask
     setTimeout(function() {
+      if (_this.status !== RPromise.STATUS_PENDING) {
+        return
+      }
+      _this.status = RPromise.STATUS_FULFILLED
+      _this.value = result
       _this.onfulfilledFns.forEach(function(fn) {
         fn(result)
       })
@@ -20,9 +24,13 @@ function RPromise(executor) {
     if (_this.status !== RPromise.STATUS_PENDING) {
       return
     }
-    _this.status = RPromise.STATUS_REJECTED
     // 对于支持的环境，可以使用queueMicrotask
     setTimeout(function() {
+      if (_this.status !== RPromise.STATUS_PENDING) {
+        return
+      }
+      _this.status = RPromise.STATUS_REJECTED
+      _this.value = reason
       _this.onrejectedFns.forEach(function(fn) {
         fn(reason)
       })
@@ -83,14 +91,20 @@ RPromise.prototype = {
     }
     var _this = this
     return new RPromise(function(resolve, reject) {
+      if (_this.status === RPromise.STATUS_FULFILLED) {
+        onRPromiseStatusChanged(onfulfilled, _this.value, resolve, reject)
+        return
+      }
+      if (_this.status === RPromise.STATUS_REJECTED) {
+        onRPromiseStatusChanged(onrejected, _this.value, resolve, reject)
+        return
+      }
       _this.onfulfilledFns.push(function(result) {
         onRPromiseStatusChanged(onfulfilled, result, resolve, reject)
       })
-      if (onrejected) {
-        _this.onrejectedFns.push(function(reason) {
-          onRPromiseStatusChanged(onrejected, reason, resolve, reject)
-        })
-      }
+      _this.onrejectedFns.push(function(reason) {
+        onRPromiseStatusChanged(onrejected, reason, resolve, reject)
+      })
     })
   }
 }
