@@ -1,12 +1,32 @@
 function RPromise(executor) {
   this.onfulfilledFns = []
   this.onrejectedFns = []
+  this.status = RPromise.STATUS_PENDING
+  var _this = this
 
-  var resolve = function() {
-
+  var resolve = function(result) {
+    if (_this.status !== RPromise.STATUS_PENDING) {
+      return
+    }
+    _this.status = RPromise.STATUS_FULFILLED
+    // 对于支持的环境，可以使用queueMicrotask
+    setTimeout(function() {
+      _this.onfulfilledFns.forEach(function(fn) {
+        fn(result)
+      })
+    })
   }
-  var reject = function() {
-
+  var reject = function(reason) {
+    if (_this.status !== RPromise.STATUS_PENDING) {
+      return
+    }
+    _this.status = RPromise.STATUS_REJECTED
+    // 对于支持的环境，可以使用queueMicrotask
+    setTimeout(function() {
+      _this.onrejectedFns.forEach(function(fn) {
+        fn(reason)
+      })
+    })
   }
 
   executor(resolve, reject)
@@ -43,6 +63,10 @@ RPromise.prototype = {
     }
     if (onrejected && typeof onfulfilled !== 'function') {
       throw new TypeError('expect a function')
+    }
+    this.onfulfilledFns.push(onfulfilled)
+    if (onrejected) {
+      this.onrejectedFns.push(onrejected)
     }
   }
 }
