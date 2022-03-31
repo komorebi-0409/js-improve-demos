@@ -22,6 +22,20 @@ class DependenciesController {
 
 const dependenciesMap = new WeakMap() // 用于存放所有的依赖
 
+function getDependenciesController(target, property){
+  let propertyMap = dependenciesMap.get(target)
+  if (!propertyMap) {
+    propertyMap = new Map()
+    dependenciesMap.set(target, propertyMap)
+  }
+  let dc = propertyMap.get(property)
+  if (!dc) {
+    dc = new DependenciesController()
+    propertyMap.set(property, dc)
+  }
+  return dc
+}
+
 function watchEffect(fn){
   currentDependency = fn
   currentDependency()
@@ -31,12 +45,14 @@ function watchEffect(fn){
 function reactive(obj) {
   return new Proxy(obj, {
     get(target, property) {
-      // todo: 收集依赖
+      const dc = getDependenciesController(target, property)
+      dc.addDependency()
       return Reflect.get(target, property)
     },
     set(target, property, value) {
-      // todo: 触发依赖
       Reflect.set(target, property, value)
+      const dc = getDependenciesController(target, property)
+      dc.notify()
     }
   })
 }
