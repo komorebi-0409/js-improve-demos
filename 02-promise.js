@@ -3,8 +3,18 @@ function RPromise(executor) {
   this.onrejectedFns = []
   this.status = RPromise.STATUS_PENDING
   var _this = this
+  
+  function resolve (result) {
+    // result 是一个 promise 对象的处理
+    if (result instanceof RPromise) {
+      result.then(resolve, reject)
+      return
+    }
+    // result 是一个 thenable 对象的处理
+    if (typeof (result && result.then) === 'function') {
+      result.then(resolve, reject)
+    }
 
-  var resolve = function(result) {
     // 如果状态已经改变 直接不添加任务
     if (_this.status !== RPromise.STATUS_PENDING) {
       return
@@ -22,7 +32,7 @@ function RPromise(executor) {
       })
     })
   }
-  var reject = function(reason) {
+  function reject(reason) {
     if (_this.status !== RPromise.STATUS_PENDING) {
       return
     }
@@ -33,6 +43,10 @@ function RPromise(executor) {
       }
       _this.status = RPromise.STATUS_REJECTED
       _this.value = reason
+      // 如果有错误但是没有处理，那么报错
+      if (!_this.onrejectedFns.length) {
+        throw new Error('Uncaught (in promise) ' + reason)
+      }
       _this.onrejectedFns.forEach(function(fn) {
         fn(reason)
       })
