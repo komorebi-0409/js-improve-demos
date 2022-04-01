@@ -147,4 +147,24 @@ Object.defineProperty(RPromise.prototype, 'constructor', {
   value: RPromise
 })
 
+// 静态方法
+var RPromiseStaticMethods = {
+  resolve: function(result) {
+    return new RPromise(function(resolve) {
+      resolve(result)
+    })
+  },
+  reject: function(reason) {
+    return new RPromise(function(resolve, reject) {
+      reject(reason)
+    })
+  }
+}
+
+for (var method in RPromiseStaticMethods) {
+  if (Object.hasOwnProperty.call(RPromiseStaticMethods, method)) {
+    RPromise[method] = RPromiseStaticMethods[method]
+  }
+}
+
 module.exports = RPromise
