@@ -158,6 +158,51 @@ var RPromiseStaticMethods = {
     return new RPromise(function(resolve, reject) {
       reject(reason)
     })
+  },
+  all: function(promises) {
+    return new RPromise(function(resolve, reject){
+      var values = []
+      var _index = 0
+      promises.forEach(function(promise, index) {
+        // 对普通对象的处理
+        if (!(typeof (promise && promise.then) === 'function')) {
+          promise = RPromise.resolve(promise)
+        }
+        promise.then(function(res) {
+          values[index] = res
+          _index++
+          if (_index === promises.length) {
+            resolve(values)
+          }
+        }, function(reason) {
+          reject(reason)
+        })
+      })
+    })
+  },
+  allSettled: function (promises) {
+    return new RPromise(function (resolve) {
+      var values = []
+      var _index = 0
+      promises.forEach(function (promise, index) {
+        if (!(typeof (promise && promise.then) === 'function')) {
+          promise = RPromise.resolve(promise)
+        }
+        promise.then(function (res) {
+          values[index] = { status: RPromise.STATUS_FULFILLED, value: res }
+          _index++
+          if (_index === promises.length) {
+            resolve(values)
+          }
+        }, function (reason) {
+          values[index] = { status: RPromise.STATUS_REJECTED, reason: reason }
+          _index++
+          if (_index === promises.length) {
+            resolve(values)
+          }
+        })
+      })
+    })
   }
 }
 
