@@ -5,14 +5,10 @@ function RPromise(executor) {
   var _this = this
   
   function resolve (result) {
-    // result 是一个 promise 对象的处理
-    if (result instanceof RPromise) {
-      result.then(resolve, reject)
-      return
-    }
-    // result 是一个 thenable 对象的处理
+    // result 是一个 promise 对象或 thenable 的处理
     if (typeof (result && result.then) === 'function') {
       result.then(resolve, reject)
+      return
     }
 
     // 如果状态已经改变 直接不添加任务
