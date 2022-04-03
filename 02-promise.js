@@ -115,11 +115,15 @@ RPromise.prototype = {
     return new RPromise(function (resolve, reject) {
       // 调用 then 方法时，如果 promise 状态已经发生改变，直接调用回调函数
       if (_this.status === RPromise.STATUS_FULFILLED) {
-        onRPromiseStatusChanged(onfulfilled, _this.value, resolve, reject)
+        setTimeout(function () {
+          onRPromiseStatusChanged(onfulfilled, _this.value, resolve, reject)
+        })
         return
       }
       if (_this.status === RPromise.STATUS_REJECTED) {
-        onRPromiseStatusChanged(onrejected, _this.value, resolve, reject)
+        setTimeout(function () {
+          onRPromiseStatusChanged(onrejected, _this.value, resolve, reject)
+        })
         return
       }
 
