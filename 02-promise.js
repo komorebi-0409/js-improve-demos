@@ -37,12 +37,12 @@ function RPromise(executor) {
       if (_this.status !== RPromise.STATUS_PENDING) {
         return
       }
-      _this.status = RPromise.STATUS_REJECTED
-      _this.value = reason
       // 如果有错误但是没有处理，那么报错
       if (!_this.onrejectedFns.length) {
         throw new Error('Uncaught (in promise) ' + reason)
       }
+      _this.status = RPromise.STATUS_REJECTED
+      _this.value = reason
       _this.onrejectedFns.forEach(function (fn) {
         fn(reason)
       })
