@@ -140,7 +140,13 @@ RPromise.prototype = {
     return this.then(undefined, onrejected)
   },
   finally: function (onStatusChanged) {
-    return this.then(onStatusChanged, onStatusChanged)
+    return this.then(function (result) {
+      onStatusChanged()
+      return result
+    }, function (reason) {
+      onStatusChanged()
+      throw reason
+    })
   }
 }
 // 修正构造器
@@ -239,4 +245,7 @@ for (var method in RPromiseStaticMethods) {
   }
 }
 
-module.exports = RPromise
+// module.exports = RPromise
+export {
+  RPromise
+}
