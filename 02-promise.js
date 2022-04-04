@@ -39,7 +39,8 @@ function RPromise(executor) {
       }
       // 如果有错误但是没有处理，那么报错
       if (!_this.onrejectedFns.length) {
-        throw new Error('Uncaught (in promise) ' + reason)
+        var err = new Error('Uncaught (in promise) ' + reason)
+        console.error(err.stack)
       }
       _this.status = RPromise.STATUS_REJECTED
       _this.value = reason
@@ -245,7 +246,4 @@ for (var method in RPromiseStaticMethods) {
   }
 }
 
-// module.exports = RPromise
-export {
-  RPromise
-}
+module.exports = RPromise
